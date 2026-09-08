@@ -1,0 +1,6 @@
+{
+  "name": "OmniPlayer - Pro Multimedia Player",
+  "description": "High-resolution multimedia player supporting MKV, AVI, FLAC, MP4, 5.1/7.1 surround sound spatial audio, hardware accelerated rendering, and customizable subtitles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
