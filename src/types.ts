@@ -110,3 +110,14 @@ export interface HardwareInfo {
   webCodecsSupported: boolean;
   audioMaxChannels: number;
 }
+
+export interface BackgroundAudioSettings {
+  enabled: boolean;
+  onlyAudioTracks: boolean;
+  resumeOnFocus: boolean;
+}
+
+export interface RecentlyPlayedItem extends MediaItem {
+  lastPlayedAt: number; // timestamp ms
+  lastPosition?: number; // seconds
+}

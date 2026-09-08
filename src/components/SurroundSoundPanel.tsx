@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  BackgroundAudioSettings,
   SurroundMode,
   SurroundSettings,
 } from '../types';
@@ -21,6 +22,8 @@ interface SurroundSoundPanelProps {
   onClose: () => void;
   settings: SurroundSettings;
   onChangeSettings: (newSettings: SurroundSettings) => void;
+  backgroundAudioSettings?: BackgroundAudioSettings;
+  onChangeBackgroundAudio?: (settings: BackgroundAudioSettings) => void;
 }
 
 export const SurroundSoundPanel: React.FC<SurroundSoundPanelProps> = ({
@@ -28,6 +31,8 @@ export const SurroundSoundPanel: React.FC<SurroundSoundPanelProps> = ({
   onClose,
   settings,
   onChangeSettings,
+  backgroundAudioSettings,
+  onChangeBackgroundAudio,
 }) => {
   if (!isOpen) return null;
 
@@ -129,6 +134,82 @@ export const SurroundSoundPanel: React.FC<SurroundSoundPanelProps> = ({
 
         {/* Modal Content */}
         <div className="p-4 md:p-6 space-y-6">
+          {/* Background Audio Playback Setting */}
+          {backgroundAudioSettings && onChangeBackgroundAudio && (
+            <div className="rounded-xl bg-gradient-to-r from-sky-950/40 via-slate-900/60 to-purple-950/30 border border-sky-500/30 p-4 shadow-md">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                    <Headphones className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-white">
+                        Background Audio Playback
+                      </span>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold tracking-wide border ${
+                          backgroundAudioSettings.enabled
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-slate-800 text-slate-400 border-slate-700'
+                        }`}
+                      >
+                        {backgroundAudioSettings.enabled ? 'ACTIVE' : 'OFF'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                      Continue playing audio when switching tabs, minimizing your browser, or locking your device screen.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Main Toggle */}
+                <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                  <input
+                    type="checkbox"
+                    id="toggle-bg-audio-surround-panel"
+                    checked={backgroundAudioSettings.enabled}
+                    onChange={(e) =>
+                      onChangeBackgroundAudio({
+                        ...backgroundAudioSettings,
+                        enabled: e.target.checked,
+                      })
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                </label>
+              </div>
+
+              {backgroundAudioSettings.enabled && (
+                <div className="mt-3.5 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                  <label className="flex items-center gap-2 cursor-pointer text-slate-200">
+                    <input
+                      type="checkbox"
+                      id="toggle-only-audio-tracks-surround"
+                      checked={backgroundAudioSettings.onlyAudioTracks}
+                      onChange={(e) =>
+                        onChangeBackgroundAudio({
+                          ...backgroundAudioSettings,
+                          onlyAudioTracks: e.target.checked,
+                        })
+                      }
+                      className="rounded border-slate-700 bg-slate-800 text-sky-500 focus:ring-sky-500 w-4 h-4 cursor-pointer"
+                    />
+                    <span className="font-semibold text-sky-300">
+                      Specifically for FLAC & audio-only tracks
+                    </span>
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {backgroundAudioSettings.onlyAudioTracks
+                      ? 'Videos pause on tab blur to save resources'
+                      : 'All media audio continues in background'}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* 1. Surround Mode Selection */}
           <div>
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block mb-2.5">

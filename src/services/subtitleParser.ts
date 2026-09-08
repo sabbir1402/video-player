@@ -47,6 +47,26 @@ export function formatTime(seconds: number, includeMs = false): string {
 }
 
 /**
+ * Formats a past timestamp into a human-friendly relative time (e.g. 'Just now', '5m ago', 'Yesterday')
+ */
+export function formatRelativeTime(timestamp: number): string {
+  if (!timestamp) return '';
+  const now = Date.now();
+  const diffSec = Math.max(0, Math.floor((now - timestamp) / 1000));
+
+  if (diffSec < 45) return 'Just now';
+  if (diffSec < 90) return '1m ago';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return new Date(timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/**
  * Strips formatting tags from subtitle text or cleans them safely
  */
 export function cleanSubtitleText(text: string): string {

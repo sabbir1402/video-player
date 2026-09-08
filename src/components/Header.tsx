@@ -8,7 +8,12 @@ import {
   Sliders,
   Radio,
   FileText,
-  Volume2
+  Volume2,
+  Download,
+  Smartphone,
+  Monitor,
+  Settings,
+  Headphones,
 } from 'lucide-react';
 import { HardwareInfo, MediaItem } from '../types';
 import { DEMO_MEDIA_ITEMS } from '../data/demoMedia';
@@ -17,6 +22,7 @@ interface HeaderProps {
   currentMedia: MediaItem | null;
   hardwareInfo: HardwareInfo;
   surroundMode: string;
+  backgroundAudioEnabled?: boolean;
   onOpenFiles: (files: FileList) => void;
   onOpenSubtitleFile: (file: File) => void;
   onSelectDemo: (item: MediaItem) => void;
@@ -24,12 +30,15 @@ interface HeaderProps {
   onOpenSubtitleSettings: () => void;
   onOpenVideoSettings: () => void;
   onOpenInspector: () => void;
+  onOpenInstallApp: () => void;
+  onOpenSettings?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentMedia,
   hardwareInfo,
   surroundMode,
+  backgroundAudioEnabled = true,
   onOpenFiles,
   onOpenSubtitleFile,
   onSelectDemo,
@@ -37,6 +46,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSubtitleSettings,
   onOpenVideoSettings,
   onOpenInspector,
+  onOpenInstallApp,
+  onOpenSettings,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const subInputRef = useRef<HTMLInputElement>(null);
@@ -184,6 +195,20 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
+        {/* Install App Button for Android & Windows */}
+        <button
+          id="btn-install-app"
+          onClick={onOpenInstallApp}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold shadow-sm transition-all cursor-pointer"
+          title="Install OmniPlayer on Android or Windows"
+        >
+          <Download className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Install App</span>
+          <span className="hidden xl:inline-block text-[10px] py-0.2 px-1 rounded bg-emerald-500/25 text-emerald-200 font-mono font-medium">
+            Win/Android
+          </span>
+        </button>
+
         {/* Surround Sound Panel Toggle */}
         <button
           id="btn-header-surround"
@@ -223,6 +248,25 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Info className="w-4 h-4 text-sky-400" />
         </button>
+
+        {/* Comprehensive Settings Modal Toggle */}
+        {onOpenSettings && (
+          <button
+            id="btn-header-settings"
+            onClick={onOpenSettings}
+            className="flex items-center gap-1.5 p-2 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 transition-colors cursor-pointer relative"
+            title="Player & Audio Settings (Background Playback, Surround & GPU)"
+          >
+            <Settings className="w-4 h-4 text-sky-400" />
+            <span className="hidden xl:inline text-xs font-semibold">Settings</span>
+            {backgroundAudioEnabled && (
+              <span
+                className="w-2 h-2 rounded-full bg-emerald-400 absolute top-1 right-1"
+                title="Background Audio Active"
+              />
+            )}
+          </button>
+        )}
       </div>
     </header>
   );

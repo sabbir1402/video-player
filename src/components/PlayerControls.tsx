@@ -54,6 +54,8 @@ interface PlayerControlsProps {
   onOpenSurroundPanel: () => void;
   onOpenVideoSettings: () => void;
   onTogglePlaylist: () => void;
+  onOpenSettings?: () => void;
+  backgroundAudioEnabled?: boolean;
 }
 
 export const PlayerControls: React.FC<PlayerControlsProps> = ({
@@ -87,6 +89,8 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   onOpenSurroundPanel,
   onOpenVideoSettings,
   onTogglePlaylist,
+  onOpenSettings,
+  backgroundAudioEnabled = true,
 }) => {
   const progressBarRef = useRef<HTMLDivElement>(null);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
@@ -387,6 +391,21 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           >
             <Tv className="w-4 h-4" />
           </button>
+
+          {/* Player & Audio Settings Modal */}
+          {onOpenSettings && (
+            <button
+              id="btn-player-settings"
+              onClick={onOpenSettings}
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer relative"
+              title="Player & Audio Settings (Background Playback & Sound)"
+            >
+              <Settings className="w-4 h-4" />
+              {backgroundAudioEnabled && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1.5 right-1.5" />
+              )}
+            </button>
+          )}
 
           {/* Playlist Drawer Toggle */}
           <button

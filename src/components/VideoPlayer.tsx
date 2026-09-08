@@ -28,7 +28,9 @@ interface VideoPlayerProps {
   activeCues: SubtitleCue[];
   hardwareInfo: HardwareInfo;
   isPlaying: boolean;
+  backgroundAudioEnabled?: boolean;
   onTogglePlay: () => void;
+  onToggleFullscreen?: () => void;
   onDropFiles: (files: FileList) => void;
   onTimeUpdate: () => void;
   onLoadedMetadata: () => void;
@@ -43,7 +45,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   activeCues,
   hardwareInfo,
   isPlaying,
+  backgroundAudioEnabled = true,
   onTogglePlay,
+  onToggleFullscreen,
   onDropFiles,
   onTimeUpdate,
   onLoadedMetadata,
@@ -81,7 +85,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const handleDoubleClick = () => {
-    if (!document.fullscreenElement) {
+    if (onToggleFullscreen) {
+      onToggleFullscreen();
+    } else if (!document.fullscreenElement) {
       containerRef.current?.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen().catch(() => {});
@@ -186,9 +192,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               <div className="absolute w-96 h-96 rounded-full bg-sky-500/10 blur-3xl pointer-events-none -top-20 -left-20 animate-pulse" />
               <div className="absolute w-96 h-96 rounded-full bg-purple-500/10 blur-3xl pointer-events-none -bottom-20 -right-20 animate-pulse" />
 
-              {/* Hidden media element for Web Audio graph processing */}
-              <video
-                ref={videoRef}
+              {/* Media element for Web Audio graph processing & continuous background audio playback */}
+              <audio
+                ref={videoRef as any}
                 id="main-html5-audio"
                 src={media.src}
                 playsInline
@@ -196,7 +202,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 onTimeUpdate={onTimeUpdate}
                 onLoadedMetadata={onLoadedMetadata}
                 onEnded={onEnded}
-                className="hidden"
+                preload="auto"
+                style={{
+                  position: 'absolute',
+                  width: '1px',
+                  height: '1px',
+                  opacity: 0.001,
+                  pointerEvents: 'none',
+                  clip: 'rect(0, 0, 0, 0)',
+                }}
               />
 
               {/* Album Art / Vinyl Spinning Graphic */}
@@ -257,6 +271,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 <p className="text-sm text-slate-400 truncate">
                   {media.artist || 'High-Resolution Audio Stream'} • {media.album || 'Lossless Reference'}
                 </p>
+
+                {backgroundAudioEnabled && (
+                  <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-white/10 text-[11px] text-slate-300 backdrop-blur-md">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Background Playback Ready • Stays Active on Tab Switch</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

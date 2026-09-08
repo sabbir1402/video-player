@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e131f"/>
+      <stop offset="50%" stop-color="#090b10"/>
+      <stop offset="100%" stop-color="#040608"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#0284c7" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded rectangle -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" stroke="#38bdf8" stroke-opacity="0.25" stroke-width="6"/>
+
+  <!-- Subtle outer soundwave circles -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#38bdf8" stroke-opacity="0.1" stroke-width="4" stroke-dasharray="12 12"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#818cf8" stroke-opacity="0.15" stroke-width="4"/>
+
+  <!-- Glowing media ring -->
+  <circle cx="256" cy="256" r="130" fill="#0f172a" stroke="url(#ringGrad)" stroke-width="12" filter="url(#glow)"/>
+
+  <!-- Play Symbol (Precision Play Glyph) -->
+  <polygon points="225,185 325,256 225,327" fill="url(#accentGrad)"/>
+
+  <!-- 5.1/7.1 Surround Indicator Nodes -->
+  <circle cx="256" cy="140" r="8" fill="#38bdf8"/>
+  <circle cx="340" cy="190" r="7" fill="#818cf8"/>
+  <circle cx="355" cy="285" r="7" fill="#a855f7"/>
+  <circle cx="310" cy="355" r="6" fill="#c084fc"/>
+  <circle cx="202" cy="355" r="6" fill="#c084fc"/>
+  <circle cx="157" cy="285" r="7" fill="#a855f7"/>
+  <circle cx="172" cy="190" r="7" fill="#818cf8"/>
+</svg>
