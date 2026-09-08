@@ -9,16 +9,17 @@ import {
   Volume1,
   Maximize2,
   Minimize2,
-  Pipette,
   Radio,
   FileText,
   Sliders,
   Settings,
   Crop,
-  Gauge,
   Repeat,
   Tv,
   ListVideo,
+  SlidersHorizontal,
+  X,
+  Check,
 } from 'lucide-react';
 import { formatTime } from '../services/subtitleParser';
 import { MediaItem, SubtitleSettings, SurroundSettings, VideoEnhancements } from '../types';
@@ -97,11 +98,12 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   const [hoverPos, setHoverPos] = useState<number>(0);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSubMenu, setShowSubMenu] = useState(false);
-  const [showAudioMenu, setShowAudioMenu] = useState(false);
+  const [showMobileMore, setShowMobileMore] = useState(false);
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
   const bufferedPercent = duration > 0 ? (buffered / duration) * 100 : 0;
 
+  // Mouse seek handler
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!progressBarRef.current || duration <= 0) return;
     const rect = progressBarRef.current.getBoundingClientRect();
@@ -123,24 +125,42 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     setHoverTime(null);
   };
 
+  // Touch seek handlers for Mobile Phone & Touchscreen Windows devices
+  const handleTouchSeek = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!progressBarRef.current || duration <= 0) return;
+    const touch = e.touches[0];
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const pos = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+    setHoverPos(touch.clientX - rect.left);
+    setHoverTime(pos * duration);
+    onSeek(pos * duration);
+  };
+
+  const handleTouchEnd = () => {
+    setHoverTime(null);
+  };
+
   const speeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 3.0];
 
   return (
     <div
       id="player-controls-root"
-      className="bg-[#0b0e14]/95 backdrop-blur-md border-t border-white/10 px-4 py-2.5 flex flex-col gap-2 select-none z-20 shrink-0"
+      className="bg-[#0b0e14]/95 backdrop-blur-md border-t border-white/10 px-3 sm:px-4 py-2 sm:py-2.5 flex flex-col gap-1.5 sm:gap-2 select-none z-20 shrink-0"
     >
-      {/* 1. Precision Timeline Scrubber */}
+      {/* 1. Precision Timeline Scrubber (Touch & Mouse friendly) */}
       <div
         ref={progressBarRef}
         id="timeline-progress-bar"
         onClick={handleProgressClick}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-full h-3 group cursor-pointer flex items-center py-1"
+        onTouchStart={handleTouchSeek}
+        onTouchMove={handleTouchSeek}
+        onTouchEnd={handleTouchEnd}
+        className="relative w-full h-5 sm:h-3.5 group cursor-pointer flex items-center py-1 touch-none"
       >
         {/* Track background */}
-        <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden relative group-hover:h-2 transition-all">
+        <div className="w-full h-1.5 sm:h-1.5 bg-slate-800 rounded-full overflow-hidden relative group-hover:h-2 sm:group-hover:h-2 transition-all">
           {/* Buffered track */}
           <div
             className="absolute top-0 left-0 h-full bg-slate-700/60 transition-all duration-200"
@@ -153,13 +173,13 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           />
         </div>
 
-        {/* Scrubber thumb */}
+        {/* Scrubber thumb - larger on mobile for easy dragging */}
         <div
-          className="absolute w-3.5 h-3.5 bg-white rounded-full shadow-md shadow-black/60 border border-sky-400 scale-0 group-hover:scale-100 transition-transform -translate-x-1/2 pointer-events-none"
+          className="absolute w-4 h-4 sm:w-3.5 sm:h-3.5 bg-white rounded-full shadow-md shadow-black/60 border border-sky-400 scale-100 sm:scale-0 sm:group-hover:scale-100 transition-transform -translate-x-1/2 pointer-events-none"
           style={{ left: `${progressPercent}%` }}
         />
 
-        {/* Hover Time Tooltip */}
+        {/* Hover / Touch Time Tooltip */}
         {hoverTime !== null && (
           <div
             className="absolute -top-7 px-2 py-0.5 rounded bg-slate-900 border border-white/15 text-[11px] font-mono text-white shadow-lg pointer-events-none -translate-x-1/2"
@@ -170,8 +190,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
         )}
       </div>
 
-      {/* 2. Main Control Bar */}
-      <div className="flex items-center justify-between gap-2">
+      {/* 2. Main Control Bar: Adaptive for Phones vs Windows Desktop */}
+
+      {/* --- DESKTOP / WIDE SCREEN CONTROLS (Windows/Laptop/Tablet >= sm: 640px) --- */}
+      <div className="hidden sm:flex items-center justify-between gap-2">
         {/* Left: Playback, Steps, Volume & Time */}
         <div className="flex items-center gap-2 md:gap-3">
           {/* Play/Pause Button */}
@@ -188,7 +210,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             )}
           </button>
 
-          {/* Step backward 5s or 1 frame */}
+          {/* Step backward 5s */}
           <button
             id="btn-step-back"
             onClick={() => onStepFrame(-5)}
@@ -198,7 +220,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <RotateCcw className="w-4 h-4" />
           </button>
 
-          {/* Step forward 5s or 1 frame */}
+          {/* Step forward 5s */}
           <button
             id="btn-step-forward"
             onClick={() => onStepFrame(5)}
@@ -208,7 +230,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <RotateCw className="w-4 h-4" />
           </button>
 
-          {/* Volume Control */}
+          {/* Volume Control Slider */}
           <div className="flex items-center gap-1.5 group/vol">
             <button
               id="btn-volume-mute"
@@ -238,7 +260,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           </div>
 
           {/* Time Counter */}
-          <div className="text-xs font-mono text-slate-300 ml-1">
+          <div className="text-xs font-mono text-slate-300 ml-1 whitespace-nowrap">
             <span className="text-white font-semibold">{formatTime(currentTime)}</span>
             <span className="text-slate-500 mx-1">/</span>
             <span className="text-slate-400">{formatTime(duration)}</span>
@@ -317,7 +339,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             title="5.1/7.1 Surround Sound Engine"
           >
             <Radio className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">
+            <span className="hidden lg:inline">
               {surroundSettings.mode === 'surround51'
                 ? '5.1 SURROUND'
                 : surroundSettings.mode === 'surround71'
@@ -386,7 +408,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           <button
             id="btn-pip"
             onClick={onTogglePiP}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer hidden sm:block"
+            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer hidden md:block"
             title="Picture-in-Picture"
           >
             <Tv className="w-4 h-4" />
@@ -426,6 +448,225 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
+        </div>
+      </div>
+
+      {/* --- MOBILE PHONE CONTROLS (< sm: 640px) --- */}
+      {/* Perfectly sized, touch-friendly, zero-overflow mobile deck */}
+      <div className="flex sm:hidden items-center justify-between gap-2">
+        {/* Left Mobile: Play/Pause, Step 5s, Time */}
+        <div className="flex items-center gap-1.5">
+          {/* Large touch Play/Pause (min 44px) */}
+          <button
+            id="btn-play-pause-mobile"
+            onClick={onTogglePlay}
+            className="w-11 h-11 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 flex items-center justify-center shadow-lg shadow-sky-500/20 active:scale-95 transition-transform cursor-pointer shrink-0"
+            title={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <Pause className="w-5 h-5 fill-slate-950 text-slate-950" />
+            ) : (
+              <Play className="w-5 h-5 fill-slate-950 text-slate-950 ml-0.5" />
+            )}
+          </button>
+
+          {/* 5s Step backward */}
+          <button
+            id="btn-step-back-mobile"
+            onClick={() => onStepFrame(-5)}
+            className="w-9 h-9 rounded-lg text-slate-300 active:bg-slate-800 flex items-center justify-center cursor-pointer"
+            title="Back 5s"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+
+          {/* 5s Step forward */}
+          <button
+            id="btn-step-forward-mobile"
+            onClick={() => onStepFrame(5)}
+            className="w-9 h-9 rounded-lg text-slate-300 active:bg-slate-800 flex items-center justify-center cursor-pointer"
+            title="Forward 5s"
+          >
+            <RotateCw className="w-4 h-4" />
+          </button>
+
+          {/* Compact Mobile Time Badge */}
+          <div className="text-[11px] font-mono text-slate-300 pl-0.5">
+            <span className="text-white font-bold">{formatTime(currentTime)}</span>
+            <span className="text-slate-500 mx-0.5">/</span>
+            <span className="text-slate-400">{formatTime(duration)}</span>
+          </div>
+        </div>
+
+        {/* Right Mobile: Mute, CC, Playlist, Fullscreen, and Mobile More Menu */}
+        <div className="flex items-center gap-1">
+          {/* Mute / Volume toggle */}
+          <button
+            id="btn-mute-mobile"
+            onClick={onToggleMute}
+            className="w-9 h-9 rounded-lg text-slate-300 active:bg-slate-800 flex items-center justify-center cursor-pointer"
+            title={isMuted ? 'Unmute' : 'Mute'}
+          >
+            {isMuted || volume === 0 ? (
+              <VolumeX className="w-4 h-4 text-rose-400" />
+            ) : (
+              <Volume2 className="w-4 h-4" />
+            )}
+          </button>
+
+          {/* Subtitles (CC) Toggle */}
+          <button
+            id="btn-subtitles-mobile"
+            onClick={onToggleSubtitles}
+            className={`w-9 h-9 rounded-lg text-xs font-bold flex items-center justify-center cursor-pointer transition-colors ${
+              subtitleSettings.isEnabled
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                : 'text-slate-400 active:bg-slate-800'
+            }`}
+            title="Toggle Subtitles"
+          >
+            CC
+          </button>
+
+          {/* Playlist Drawer Button */}
+          <button
+            id="btn-playlist-mobile"
+            onClick={onTogglePlaylist}
+            className="w-9 h-9 rounded-lg text-slate-300 active:bg-slate-800 flex items-center justify-center cursor-pointer"
+            title="Playlist"
+          >
+            <ListVideo className="w-4 h-4" />
+          </button>
+
+          {/* Fullscreen Toggle */}
+          <button
+            id="btn-fullscreen-mobile"
+            onClick={onToggleFullscreen}
+            className="w-9 h-9 rounded-lg text-slate-300 active:bg-slate-800 flex items-center justify-center cursor-pointer"
+            title="Fullscreen"
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
+          {/* Mobile More Quick Actions Menu */}
+          <div className="relative">
+            <button
+              id="btn-mobile-more-controls"
+              onClick={() => setShowMobileMore(!showMobileMore)}
+              className="w-9 h-9 rounded-lg text-slate-300 bg-slate-800/80 border border-white/10 flex items-center justify-center cursor-pointer"
+              title="More Playback Controls"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-sky-400" />
+            </button>
+
+            {/* Mobile Sheet / Dropdown for Extra Controls */}
+            {showMobileMore && (
+              <>
+                <div
+                  className="fixed inset-0 bg-black/60 z-40"
+                  onClick={() => setShowMobileMore(false)}
+                />
+                <div className="absolute bottom-full right-0 mb-2 w-72 max-w-[90vw] bg-[#121620] border border-white/15 rounded-2xl shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95">
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">
+                      Playback Controls
+                    </span>
+                    <button
+                      onClick={() => setShowMobileMore(false)}
+                      className="p-1 text-slate-400 hover:text-white rounded"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Playback Speeds */}
+                  <div className="mb-3">
+                    <span className="text-[11px] font-semibold text-slate-400 block mb-1.5">
+                      Playback Speed
+                    </span>
+                    <div className="grid grid-cols-5 gap-1">
+                      {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => {
+                            onPlaybackRateChange(s);
+                            setShowMobileMore(false);
+                          }}
+                          className={`py-1.5 rounded-lg text-xs font-mono font-medium transition-colors ${
+                            playbackRate === s
+                              ? 'bg-sky-600 text-white font-bold'
+                              : 'bg-slate-800 text-slate-300 active:bg-slate-700'
+                          }`}
+                        >
+                          {s}x
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick Feature Buttons */}
+                  <div className="space-y-1.5 text-xs">
+                    <button
+                      onClick={() => {
+                        onOpenSurroundPanel();
+                        setShowMobileMore(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl bg-slate-800/60 active:bg-slate-700 flex items-center justify-between text-purple-300 font-medium"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Radio className="w-4 h-4 text-purple-400" />
+                        <span>5.1 / 7.1 Spatial Audio</span>
+                      </div>
+                      <span className="text-[10px] font-mono uppercase text-slate-400">
+                        {surroundSettings.mode}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        onToggleLoop();
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl flex items-center justify-between font-medium transition-colors ${
+                        isLooping
+                          ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
+                          : 'bg-slate-800/60 active:bg-slate-700 text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Repeat className="w-4 h-4 text-sky-400" />
+                        <span>Repeat Track</span>
+                      </div>
+                      {isLooping && <Check className="w-3.5 h-3.5 text-sky-400" />}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        onOpenVideoSettings();
+                        setShowMobileMore(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl bg-slate-800/60 active:bg-slate-700 flex items-center gap-2 text-slate-200 font-medium"
+                    >
+                      <Crop className="w-4 h-4 text-emerald-400" />
+                      <span>Video Enhancer & Aspect Ratio</span>
+                    </button>
+
+                    {onOpenSettings && (
+                      <button
+                        onClick={() => {
+                          onOpenSettings();
+                          setShowMobileMore(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl bg-slate-800/60 active:bg-slate-700 flex items-center gap-2 text-slate-200 font-medium"
+                      >
+                        <Settings className="w-4 h-4 text-sky-400" />
+                        <span>Player & Audio Settings</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

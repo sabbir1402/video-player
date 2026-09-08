@@ -84,6 +84,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   };
 
+  const lastTouchTimeRef = useRef<number>(0);
+
+  const handleTouchStage = (e: React.TouchEvent) => {
+    const now = Date.now();
+    if (now - lastTouchTimeRef.current < 320) {
+      // Double tap detected: toggle fullscreen
+      lastTouchTimeRef.current = 0;
+      handleDoubleClick();
+    } else {
+      lastTouchTimeRef.current = now;
+    }
+  };
+
   const handleDoubleClick = () => {
     if (onToggleFullscreen) {
       onToggleFullscreen();
@@ -161,7 +174,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       {media ? (
         <>
           {media.type === 'video' ? (
-            <div className="relative w-full h-full flex items-center justify-center">
+            <div
+              className="relative w-full h-full flex items-center justify-center"
+              onTouchEnd={handleTouchStage}
+            >
               <video
                 ref={videoRef}
                 id="main-html5-video"
@@ -286,7 +302,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           {subtitleSettings.isEnabled && activeCues.length > 0 && (
             <div
               id="subtitles-overlay-container"
-              className="absolute left-0 right-0 pointer-events-none flex flex-col items-center justify-end z-20 px-8 transition-all"
+              className="absolute left-0 right-0 pointer-events-none flex flex-col items-center justify-end z-20 px-3 sm:px-8 transition-all"
               style={{
                 bottom: `${subtitleSettings.positionY}%`,
               }}
@@ -298,7 +314,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                   className="max-w-4xl text-center leading-relaxed transition-all duration-100"
                   style={{
                     fontFamily: subtitleSettings.fontFamily,
-                    fontSize: `${subtitleSettings.fontSize}px`,
+                    fontSize: `clamp(13px, 3.8vw, ${subtitleSettings.fontSize}px)`,
                     color: subtitleSettings.textColor,
                     backgroundColor:
                       subtitleSettings.bgOpacity > 0
@@ -310,7 +326,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                         : 'transparent',
                     textShadow: getSubShadowStyle(),
                     letterSpacing: `${subtitleSettings.letterSpacing}px`,
-                    padding: subtitleSettings.bgOpacity > 0 ? '4px 16px' : '2px 8px',
+                    padding: subtitleSettings.bgOpacity > 0 ? '4px 12px' : '2px 6px',
                     borderRadius: subtitleSettings.bgOpacity > 0 ? '8px' : '0px',
                     whiteSpace: 'pre-wrap',
                   }}
@@ -323,22 +339,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         </>
       ) : (
         /* Empty State / Drag & Drop Prompt */
-        <div className="flex flex-col items-center justify-center text-center p-8 max-w-lg z-10">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-sky-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mb-5 shadow-2xl">
-            <Tv className="w-10 h-10 text-sky-400" />
+        <div className="flex flex-col items-center justify-center text-center p-4 sm:p-8 max-w-lg z-10">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-sky-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mb-4 sm:mb-5 shadow-2xl">
+            <Tv className="w-8 h-8 sm:w-10 sm:h-10 text-sky-400" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
             No Media Selected
           </h3>
-          <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-            Drag & drop any video or audio file here, or click Open Media in the top bar. Full native hardware-accelerated playback for MKV, AVI, FLAC, MP4, WebM, and more.
+          <p className="text-xs sm:text-sm text-slate-400 mb-4 sm:mb-6 leading-relaxed max-w-sm sm:max-w-md">
+            Drag & drop any video or audio file here, or click Open in the top bar. Hardware-accelerated playback for MKV, AVI, FLAC, MP4, WebM, and more.
           </p>
-          <div className="flex flex-wrap gap-2 justify-center text-xs font-mono text-slate-400">
-            <span className="px-2 py-1 bg-slate-900/80 rounded border border-white/10">.MKV</span>
-            <span className="px-2 py-1 bg-slate-900/80 rounded border border-white/10">.AVI</span>
-            <span className="px-2 py-1 bg-slate-900/80 rounded border border-white/10">.FLAC (96kHz)</span>
-            <span className="px-2 py-1 bg-slate-900/80 rounded border border-white/10">.MP4 (4K)</span>
-            <span className="px-2 py-1 bg-slate-900/80 rounded border border-white/10">.SRT / .VTT / .ASS</span>
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center text-[11px] sm:text-xs font-mono text-slate-400">
+            <span className="px-2 py-0.5 sm:py-1 bg-slate-900/80 rounded border border-white/10">.MKV</span>
+            <span className="px-2 py-0.5 sm:py-1 bg-slate-900/80 rounded border border-white/10">.AVI</span>
+            <span className="px-2 py-0.5 sm:py-1 bg-slate-900/80 rounded border border-white/10">.FLAC</span>
+            <span className="px-2 py-0.5 sm:py-1 bg-slate-900/80 rounded border border-white/10">.MP4</span>
+            <span className="px-2 py-0.5 sm:py-1 bg-slate-900/80 rounded border border-white/10">.SRT/.VTT</span>
           </div>
         </div>
       )}
@@ -355,10 +371,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       )}
 
       {/* Hardware Accel & Codec Badge in Corner */}
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none">
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-20 flex items-center gap-1.5 sm:gap-2 opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none">
         {media && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 text-xs font-mono text-slate-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[10px] sm:text-xs font-mono text-slate-200">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="font-bold uppercase text-sky-400">{media.format}</span>
             <span className="text-slate-400">•</span>
             <span>{media.resolution || 'UHD'}</span>

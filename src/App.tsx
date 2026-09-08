@@ -709,7 +709,7 @@ export default function App() {
 
   return (
     <div
-      className="flex flex-col h-screen w-screen bg-[#07090e] text-[#e2e8f0] overflow-hidden select-none font-sans"
+      className="flex flex-col h-[100dvh] h-screen w-full bg-[#07090e] text-[#e2e8f0] overflow-hidden select-none font-sans"
       onMouseMove={handleUserActivity}
       onTouchStart={handleUserActivity}
     >
@@ -853,9 +853,9 @@ export default function App() {
           </div>
         </div>
 
-        {/* Optional Right/Bottom Audio Visualizer & Surround Monitor (HIDDEN IN FULLSCREEN) */}
+        {/* Optional Right Audio Visualizer & Surround Monitor (Hidden on mobile phones to maximize video player viewport, hidden in theater & fullscreen) */}
         {!isTheaterMode && !isFullscreen && (
-          <div className="w-full md:w-80 lg:w-96 border-t md:border-t-0 md:border-l border-white/10 p-3 bg-[#0a0d14] flex flex-col gap-3 overflow-y-auto shrink-0">
+          <div className="hidden md:flex md:w-80 lg:w-96 border-t md:border-t-0 md:border-l border-white/10 p-3 bg-[#0a0d14] flex-col gap-3 overflow-y-auto shrink-0">
             <AudioVisualizer
               isPlaying={isPlaying}
               surroundSettings={surroundSettings}

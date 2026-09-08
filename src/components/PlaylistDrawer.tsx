@@ -69,10 +69,17 @@ export const PlaylistDrawer: React.FC<PlaylistDrawerProps> = ({
   const isItemInQueue = (id: string) => playlist.some((p) => p.id === id);
 
   return (
-    <div
-      id="playlist-drawer-panel"
-      className="fixed inset-y-0 right-0 w-full sm:w-96 bg-[#0c1017]/95 backdrop-blur-xl border-l border-white/10 z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200"
-    >
+    <>
+      {/* Mobile Touch Backdrop */}
+      <div
+        id="playlist-backdrop-mobile"
+        className="fixed inset-0 bg-black/70 backdrop-blur-xs z-40 sm:hidden animate-in fade-in"
+        onClick={onClose}
+      />
+      <div
+        id="playlist-drawer-panel"
+        className="fixed inset-y-0 right-0 w-full sm:w-96 max-w-full bg-[#0c1017]/98 backdrop-blur-xl border-l border-white/10 z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200"
+      >
       {/* Header */}
       <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#101420]/80">
         <div className="flex items-center gap-2">
@@ -433,6 +440,7 @@ export const PlaylistDrawer: React.FC<PlaylistDrawerProps> = ({
         )}
       </div>
     </div>
+    </>
   );
 };
 
